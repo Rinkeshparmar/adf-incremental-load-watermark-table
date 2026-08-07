@@ -1,0 +1,15 @@
+{
+	"name": "nadiadDF",
+	"properties": {
+		"trustModeClaimForMi": {
+			"value": "Disabled",
+			"editable": true
+		}
+	},
+	"location": "southindia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "cea98a80-6342-48c5-a972-3bd251be27e4",
+		"tenantId": "7dba04cf-7376-4aff-a41f-9b145ea043bf"
+	}
+}

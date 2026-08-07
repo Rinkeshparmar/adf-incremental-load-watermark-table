@@ -1,0 +1,85 @@
+{
+	"name": "DS_blob",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_Blob_New",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"FileName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@dataset().FileName",
+					"type": "Expression"
+				},
+				"container": "julybatch1"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "Team",
+				"type": "String"
+			},
+			{
+				"name": "Tournament",
+				"type": "String"
+			},
+			{
+				"name": "Score",
+				"type": "String"
+			},
+			{
+				"name": "PlayedGames",
+				"type": "String"
+			},
+			{
+				"name": "WonGames",
+				"type": "String"
+			},
+			{
+				"name": "DrawnGames",
+				"type": "String"
+			},
+			{
+				"name": "LostGames",
+				"type": "String"
+			},
+			{
+				"name": "BasketScored",
+				"type": "String"
+			},
+			{
+				"name": "BasketGiven",
+				"type": "String"
+			},
+			{
+				"name": "TournamentChampion",
+				"type": "String"
+			},
+			{
+				"name": "Runner-up",
+				"type": "String"
+			},
+			{
+				"name": "TeamLaunch",
+				"type": "String"
+			},
+			{
+				"name": "HighestPositionHeld",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
