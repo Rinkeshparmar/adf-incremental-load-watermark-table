@@ -25,7 +25,7 @@ Because the watermark is only advanced in the *last* step, and each Copy activit
 ## Repo structure
 
 ```
-adf-incremental-load-lahman/
+adf-incremental-load-watermark-table/
 ├── README.md
 ├── docs/
 │   └── architecture.svg
