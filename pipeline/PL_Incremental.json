@@ -1,0 +1,370 @@
+{
+  "name": "PL_Incremental",
+  "properties": {
+    "activities": [
+      {
+        "name": "Lahman to Stagging",
+        "type": "Copy",
+        "dependsOn": [
+          {
+            "activity": "Get watermark value",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "userProperties": [],
+        "typeProperties": {
+          "source": {
+            "type": "AzureSqlSource",
+            "additionalColumns": [
+              {
+                "name": "insertedOn",
+                "value": {
+                  "value": "@utcNow()",
+                  "type": "Expression"
+                }
+              }
+            ],
+            "sqlReaderQuery": {
+              "value": "select * from dbo.seriespost where lastUpdated > '@{activity('Get watermark value').output.firstRow.WatermarkValue}'",
+              "type": "Expression"
+            },
+            "queryTimeout": "02:00:00",
+            "partitionOption": "None"
+          },
+          "sink": {
+            "type": "AzureSqlSink",
+            "preCopyScript": "truncate table dbo.SeriesPost_S",
+            "writeBehavior": "insert",
+            "sqlWriterUseTableLock": false,
+            "disableMetricsCollection": false
+          },
+          "enableStaging": false,
+          "translator": {
+            "type": "TabularTranslator",
+            "mappings": [
+              {
+                "source": {
+                  "name": "yearID",
+                  "type": "Int32",
+                  "physicalType": "int"
+                },
+                "sink": {
+                  "name": "yearID",
+                  "type": "Int32",
+                  "physicalType": "int"
+                }
+              },
+              {
+                "source": {
+                  "name": "round",
+                  "type": "String",
+                  "physicalType": "varchar"
+                },
+                "sink": {
+                  "name": "round",
+                  "type": "String",
+                  "physicalType": "varchar"
+                }
+              },
+              {
+                "source": {
+                  "name": "teamIDwinner",
+                  "type": "String",
+                  "physicalType": "varchar"
+                },
+                "sink": {
+                  "name": "teamIDwinner",
+                  "type": "String",
+                  "physicalType": "varchar"
+                }
+              },
+              {
+                "source": {
+                  "name": "lgIDwinner",
+                  "type": "String",
+                  "physicalType": "varchar"
+                },
+                "sink": {
+                  "name": "IgIDwinner",
+                  "type": "String",
+                  "physicalType": "varchar"
+                }
+              },
+              {
+                "source": {
+                  "name": "teamIDloser",
+                  "type": "String",
+                  "physicalType": "varchar"
+                },
+                "sink": {
+                  "name": "teamIDloser",
+                  "type": "String",
+                  "physicalType": "varchar"
+                }
+              },
+              {
+                "source": {
+                  "name": "wins",
+                  "type": "Int32",
+                  "physicalType": "int"
+                },
+                "sink": {
+                  "name": "wins",
+                  "type": "Int32",
+                  "physicalType": "int"
+                }
+              },
+              {
+                "source": {
+                  "name": "losses",
+                  "type": "Int32",
+                  "physicalType": "int"
+                },
+                "sink": {
+                  "name": "losses",
+                  "type": "Int32",
+                  "physicalType": "int"
+                }
+              },
+              {
+                "source": {
+                  "name": "ties",
+                  "type": "Int32",
+                  "physicalType": "int"
+                },
+                "sink": {
+                  "name": "ties",
+                  "type": "Int32",
+                  "physicalType": "int"
+                }
+              },
+              {
+                "source": {
+                  "name": "lastUpdated",
+                  "type": "DateTime",
+                  "physicalType": "datetime"
+                },
+                "sink": {
+                  "name": "lastUpdated",
+                  "type": "DateTime",
+                  "physicalType": "datetime"
+                }
+              },
+              {
+                "source": {
+                  "name": "pID",
+                  "type": "Int32",
+                  "physicalType": "int"
+                },
+                "sink": {
+                  "name": "pId",
+                  "type": "Int32",
+                  "physicalType": "int"
+                }
+              },
+              {
+                "source": {
+                  "name": "insertedOn",
+                  "type": "String"
+                },
+                "sink": {
+                  "name": "insertedOn",
+                  "type": "DateTime",
+                  "physicalType": "datetime"
+                }
+              }
+            ],
+            "typeConversion": true,
+            "typeConversionSettings": {
+              "allowDataTruncation": true,
+              "treatBooleanAsNumber": false
+            }
+          }
+        },
+        "inputs": [
+          {
+            "referenceName": "DS_Lahman",
+            "type": "DatasetReference"
+          }
+        ],
+        "outputs": [
+          {
+            "referenceName": "DS_Lah_Stage",
+            "type": "DatasetReference"
+          }
+        ]
+      },
+      {
+        "name": "Get watermark value",
+        "type": "Lookup",
+        "dependsOn": [],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "userProperties": [],
+        "typeProperties": {
+          "source": {
+            "type": "AzureSqlSource",
+            "sqlReaderQuery": "select WatermarkValue from ctrl_table_watermarks where TableName= 'seriespost'",
+            "queryTimeout": "02:00:00",
+            "partitionOption": "None"
+          },
+          "dataset": {
+            "referenceName": "DS_Lah_Stage",
+            "type": "DatasetReference"
+          }
+        }
+      },
+      {
+        "name": "Staging to History",
+        "type": "Copy",
+        "dependsOn": [
+          {
+            "activity": "Lahman to Stagging",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "userProperties": [],
+        "typeProperties": {
+          "source": {
+            "type": "AzureSqlSource",
+            "queryTimeout": "02:00:00",
+            "partitionOption": "None"
+          },
+          "sink": {
+            "type": "AzureSqlSink",
+            "writeBehavior": "upsert",
+            "upsertSettings": {
+              "useTempDB": true,
+              "keys": [
+                "pId"
+              ]
+            },
+            "sqlWriterUseTableLock": false,
+            "disableMetricsCollection": false
+          },
+          "enableStaging": false,
+          "translator": {
+            "type": "TabularTranslator",
+            "typeConversion": true,
+            "typeConversionSettings": {
+              "allowDataTruncation": true,
+              "treatBooleanAsNumber": false
+            }
+          }
+        },
+        "inputs": [
+          {
+            "referenceName": "DS_Lah_Stage",
+            "type": "DatasetReference"
+          }
+        ],
+        "outputs": [
+          {
+            "referenceName": "DS_History",
+            "type": "DatasetReference"
+          }
+        ]
+      },
+      {
+        "name": "Get history watermark",
+        "type": "Lookup",
+        "dependsOn": [
+          {
+            "activity": "Staging to History",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "userProperties": [],
+        "typeProperties": {
+          "source": {
+            "type": "AzureSqlSource",
+            "sqlReaderQuery": "select max(lastUpdated) as last_updated from dbo.SeriesPost_H",
+            "queryTimeout": "02:00:00",
+            "partitionOption": "None"
+          },
+          "dataset": {
+            "referenceName": "DS_History",
+            "type": "DatasetReference"
+          }
+        }
+      },
+      {
+        "name": "Update Watermmark",
+        "type": "SqlServerStoredProcedure",
+        "dependsOn": [
+          {
+            "activity": "Get history watermark",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "userProperties": [],
+        "typeProperties": {
+          "storedProcedureName": "[dbo].[updateWatermark_new]",
+          "storedProcedureParameters": {
+            "datetime": {
+              "value": {
+                "value": "@activity('Get history watermark').output.firstRow.last_updated",
+                "type": "Expression"
+              },
+              "type": "DateTime"
+            },
+            "status": {
+              "value": "Success",
+              "type": "String"
+            },
+            "tablename": {
+              "value": "seriespost",
+              "type": "String"
+            }
+          }
+        },
+        "linkedServiceName": {
+          "referenceName": "LS_SQL",
+          "type": "LinkedServiceReference"
+        }
+      }
+    ],
+    "annotations": []
+  }
+}
