@@ -22,6 +22,11 @@ Reloading the full `seriespost` table on every run wastes time and compute as th
 
 Because the watermark is only advanced in the *last* step, and each Copy activity depends on the previous one succeeding, a failure anywhere in the chain leaves the watermark untouched — the next run safely re-attempts the same window instead of silently skipping or duplicating data.
 
+## Pipeline in ADF Studio
+
+![Successful pipeline run](docs/successful-run.png)
+*All 5 activities completed successfully — pipeline status: Succeeded.*
+
 ## Repo structure
 
 ```
